@@ -8,7 +8,7 @@ const targetDirs = fs
   .filter(dir => fs.statSync(`packages/${dir}`).isDirectory());
 
 async function build(target) {
-  await execa('rollup', ['-c', '--environment', `TARGET:${target}`], {
+  await execa('rollup', ['-wc', '--environment', `TARGET:${target}`], {
     stdio: 'inherit', // 将子进程打包的信息共享给父进程
   });
 }

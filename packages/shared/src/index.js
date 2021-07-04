@@ -1,7 +1,5 @@
-const shared = {
-  run() {
-    console.log('shared running');
-  },
-};
+const isObject = (value) => typeof value === "object" && value !== null;
 
-export { shared };
+const extend = Object.assign;
+
+export { isObject, extend };
