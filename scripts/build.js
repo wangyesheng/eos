@@ -7,6 +7,8 @@ const targetDirs = fs
   .readdirSync('packages')
   .filter(dir => fs.statSync(`packages/${dir}`).isDirectory());
 
+console.log('targetDirs', targetDirs);
+
 async function build(target) {
   await execa('rollup', ['-wc', '--environment', `TARGET:${target}`], {
     stdio: 'inherit', // 将子进程打包的信息共享给父进程
@@ -23,4 +25,4 @@ function runParallel(dirs, iteratorFn) {
   return Promise.all(promiseWrap);
 }
 
-runParallel(targetDirs, build); 
+runParallel(targetDirs, build);

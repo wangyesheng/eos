@@ -1,5 +1,7 @@
-import { extend, isObject } from "@eos/shared";
-import { reactive, readonly } from "./reactive";
+import { extend, isObject, isIntegerKey, hasOwn, isArray } from '@eos/shared';
+import { reactive, readonly } from './reactive';
+import { track, trigger } from './effect';
+import { TRACK_OPERATION_TYPES, TRIGGER_OPERATION_TYPES } from './operators';
 
 const get = createGetter();
 const shallowGet = createGetter(false, true);
@@ -45,11 +47,11 @@ const shallowReadonlyHandlers = extend(
 
 function createGetter(isReadonly = false, isShallow = false) {
   return function get(target, key, receiver) {
-    console.log("getter");
     const result = Reflect.get(target, key, receiver);
 
     if (!isReadonly) {
       // 可能之后会被改，收集依赖
+      track(target, TRACK_OPERATION_TYPES.GET, key);
     }
 
     if (isShallow) {
@@ -65,8 +67,25 @@ function createGetter(isReadonly = false, isShallow = false) {
 }
 
 function createSetter(isShallow = false) {
-  console.log("setter");
-  return function set(target, key, value, receiver) {};
+  return function set(target, key, value, receiver) {
+    // console.log('createSetter', target, key, value, receiver);
+    const oldValue = target[key];
+
+    const hadKey =
+      isArray(target) && isIntegerKey(key)
+        ? Number(key) < target.length
+        : hasOwn(target, key);
+
+    const result = Reflect.set(target, key, value, receiver);
+    
+    if (!hadKey) {
+      // 新增
+      trigger(target, TRIGGER_OPERATION_TYPES.ADD, key, value, oldValue);
+    } else if (oldValue !== value) {
+      // 修改
+      trigger(target, TRIGGER_OPERATION_TYPES.UPDATE, key, value, oldValue);
+    }
+  };
 }
 
 export {

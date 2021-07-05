@@ -3,4 +3,6 @@ export {
   shallowReactive,
   readonly,
   shallowReadonly,
-} from "./reactive.js";
+} from './reactive';
+
+export { effect } from './effect';
